@@ -31,4 +31,16 @@ contract Vendor is Ownable {
   }
 
   // ToDo: create a sellTokens() function:
+  function sellTokens(uint256 amountOfTokens) external {
+    uint256 amountOfETH = amountOfTokens / tokensPerEth;
+
+    bool _approved = yourToken.approve(address(this), amountOfTokens);
+    require(_approved, 'token approval failed');
+
+    yourToken.transferFrom(msg.sender, address(this), amountOfTokens);
+
+    (bool success, ) = msg.sender.call{value: amountOfETH}('');
+
+    require(success, 'sellTokens failed');
+  }
 }
