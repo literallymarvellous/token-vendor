@@ -16,26 +16,29 @@ contract Vendor is Ownable {
     yourToken = YourToken(tokenAddress);
   }
 
-  // ToDo: create a payable buyTokens() function:
+  /// @notice buy tokens with ETH from vendor
   function buyTokens() external payable {
-    uint256 amountOfTokens = msg.value * tokensPerEth;
-    yourToken.transfer(msg.sender, amountOfTokens);
+    require(msg.value >= 0, 'No ethers sent');
 
+    // calculate amount of tokens to buy
+    uint256 amountOfTokens = msg.value * tokensPerEth;
+
+    yourToken.transfer(msg.sender, amountOfTokens);
     emit BuyTokens(msg.sender, msg.value, amountOfTokens);
   }
 
-  // ToDo: create a withdraw() function that lets the owner withdraw ETH
+  /// @notice withdraw tokens from vendor
+  /// @dev only owner can withdraw tokens
   function withdraw() external onlyOwner {
     (bool success, ) = owner().call{value: address(this).balance}('');
     require(success, 'withdrawal failed');
   }
 
-  // ToDo: create a sellTokens() function:
+  /// @notice sell tokens for ETH
+  /// @dev token approve() needs to be called to transfer tokens to vendor
   function sellTokens(uint256 amountOfTokens) external {
+    require(amountOfTokens > 0, 'No tokens sent');
     uint256 amountOfETH = amountOfTokens / tokensPerEth;
-
-    bool _approved = yourToken.approve(address(this), amountOfTokens);
-    require(_approved, 'token approval failed');
 
     yourToken.transferFrom(msg.sender, address(this), amountOfTokens);
 
